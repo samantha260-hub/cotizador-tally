@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tally — Cotizador / Quoter / 报价工具 / 견적 도구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,900&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --violet:#6047FF; --violet-dark:#4a35d6; --cream:#FEFCF8; --ink:#1c1830;
+    --orange:#FF8248; --cyan:#5ED7FF; --green:#49D475; --line:#e8e2f8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans','Noto Sans SC','Noto Sans KR',system-ui,sans-serif;background:var(--cream);color:var(--ink);font-size:15px}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+  header.app{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;gap:14px;flex-wrap:wrap}
+  header.app img{height:44px}
+  header.app .tag{background:var(--violet);color:#fff;padding:6px 14px;border-radius:20px;font-weight:700;font-size:13px}
+  .langbox{display:flex;align-items:center;gap:8px}
+  .langbox select{width:auto;font-weight:700}
+  h2{font-size:16px;font-weight:700;margin-bottom:12px;color:var(--violet-dark)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(96,71,255,.05)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  label{display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:#6b648a}
+  input,select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+  .grid input,.grid select{width:100%}
+  input:focus,select:focus{outline:2px solid var(--violet);border-color:var(--violet)}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#6b648a;text-align:left;padding:8px 10px;border-bottom:2px solid var(--line)}
+  td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .btn{background:var(--violet);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+  .btn:hover{background:var(--violet-dark)}
+  .btn.ghost{background:#fff;color:var(--violet);border:1.5px solid var(--violet)}
+  .btn.small{padding:5px 10px;font-size:12px}
+  .btn.orange{background:var(--orange)}
+  .btn.orange:hover{background:#e96e35}
+  .pill{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+  .pill.mes{background:#eef9f1;color:#1e9c4d}
+  .pill.gov{background:#fff1e9;color:#d15a1e}
+  .muted{color:#8a84a6;font-size:12px}
+  .name{font-weight:700}
+  .desc{font-size:12px;color:#6b648a;margin-top:2px;max-width:520px}
+  .totline{display:flex;justify-content:space-between;padding:7px 4px;font-size:14.5px}
+  .totline.big{font-size:19px;font-weight:900;border-top:2px solid var(--ink);margin-top:6px;padding-top:12px}
+  .totline .lbl{color:#55507a}
+  .disc-note{background:#f4f1ff;border:1px dashed var(--violet);border-radius:10px;padding:10px 14px;font-size:13px;margin:10px 0}
+  .flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .right{margin-left:auto}
+  .qty{width:64px !important;text-align:center}
+  .del{background:none;border:none;color:#c33;cursor:pointer;font-size:16px}
+  .catalog-row:hover{background:#faf8ff}
+  #manualDiscBox{display:none}
+  .warn{color:#d15a1e;font-size:12.5px;font-weight:700}
+  footer.app{margin-top:30px;font-size:12px;color:#8a84a6;text-align:center}
+  /* ---------- PRINT ---------- */
+  #printDoc{display:none}
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    #printDoc{display:block;font-size:12.5px}
+    @page{margin:16mm 14mm}
+    #printDoc header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--violet);padding-bottom:12px;margin-bottom:16px}
+    #printDoc header img{height:38px}
+    #printDoc h1{font-size:20px;color:var(--violet);margin-bottom:2px}
+    #printDoc .meta{font-size:11.5px;color:#555;text-align:right}
+    #printDoc table{margin:10px 0}
+    #printDoc th{border-bottom:1.5px solid var(--violet);color:var(--violet-dark)}
+    #printDoc td{padding:6px 8px;font-size:11.5px}
+    #printDoc .sec{font-weight:900;color:var(--violet-dark);margin:14px 0 4px;font-size:13px}
+    #printDoc .totbox{margin-left:auto;width:340px;margin-top:8px}
+    #printDoc .fine{font-size:10px;color:#777;margin-top:18px;line-height:1.5}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap no-print">
+  <header class="app">
+    <img src="data:image/png;base64,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" alt="Tally">
+    <span class="tag" id="hTag"></span>
+    <span class="langbox right">
+      🌐 <select id="uiLang" onchange="setLang(this.value)">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="ko">한국어</option>
+      </select>
+    </span>
+  </header>
+
+  <!-- CLIENT -->
+  <div class="card">
+    <h2 id="hClient"></h2>
+    <div class="grid">
+      <div><label id="lCompany"></label><input id="cliente"></div>
+      <div><label id="lContact"></label><input id="contacto"></div>
+      <div><label id="lQuoteNo"></label><input id="folio"></div>
+      <div><label id="lDate"></label><input id="fecha" type="date"></div>
+      <div><label id="lClass"></label><select id="clasif"></select></div>
+      <div><label id="lSkus"></label><input id="skus" type="number" min="1" value="1"></div>
+    </div>
+  </div>
+
+  <!-- CATALOG -->
+  <div class="card">
+    <h2><span id="hCatalog"></span> <span class="muted" id="hCatalogNote"></span></h2>
+    <table id="catalog"><thead>
+      <tr><th style="width:55%" id="thService"></th><th class="num" id="thFees"></th><th class="num" id="thGov"></th><th></th></tr>
+    </thead><tbody></tbody></table>
+  </div>
+
+  <!-- QUOTE -->
+  <div class="card">
+    <h2 id="hQuote"></h2>
+    <table id="quote"><thead>
+      <tr><th style="width:44%" id="thService2"></th><th id="thQty"></th><th class="num" id="thUnit"></th><th class="num" id="thFees2"></th><th class="num" id="thGov2"></th><th></th></tr>
+    </thead><tbody></tbody></table>
+    <p id="emptyMsg" class="muted" style="padding:14px 4px"></p>
+
+    <div id="discountInfo" class="disc-note"></div>
+    <div class="flex" style="margin:8px 0 16px">
+      <button id="improveBtn" class="btn orange small no-print" style="display:none" onclick="toggleManual()"></button>
+      <span id="manualDiscBox">
+        <label style="display:inline;font-size:13px"><span id="lManual"></span>&nbsp;</label>
+        <input id="manualDisc" type="number" min="0" max="20" value="0" style="width:70px;display:inline-block" onchange="render()" oninput="render()"> %
+        <span class="muted" id="lMax"></span>
+      </span>
+      <span class="right flex">
+        <label style="display:inline;font-size:13px"><span id="lTc"></span>&nbsp;1 USD =</label>
+        <input id="tc" type="number" step="0.01" value="18" style="width:80px;display:inline-block" oninput="render()"> MXN
+      </span>
+    </div>
+
+    <div style="max-width:480px;margin-left:auto">
+      <div class="totline"><span class="lbl" id="lOnce"></span><span class="num" id="tOnce"></span></div>
+      <div class="totline"><span class="lbl" id="lMonthly"></span><span class="num" id="tMonthly"></span></div>
+      <div class="totline" id="discLine" style="color:#1e9c4d"><span class="lbl"><span id="lDisc"></span> (<span id="discPct"></span>)</span><span class="num" id="tDisc"></span></div>
+      <div class="totline"><span class="lbl" id="lAfter"></span><span class="num" id="tAfter"></span></div>
+      <div class="totline"><span class="lbl" id="lIva"></span><span class="num" id="tIva"></span></div>
+      <div class="totline"><span class="lbl" id="lGov"></span><span class="num" id="tGov"></span></div>
+      <div class="totline big"><span id="lTotal"></span><span class="num" id="tTotal"></span></div>
+      <div class="totline"><span class="lbl" id="lMxn"></span><span class="num" id="tMXN"></span></div>
+      <p class="muted" style="margin-top:8px" id="footNote"></p>
+    </div>
+
+    <div class="flex" style="margin-top:20px">
+      <button class="btn ghost" onclick="resetAll()" id="btnClear"></button>
+      <span class="right flex">
+        <label style="font-size:13px"><span id="lPdfLang"></span></label>
+        <select id="pdfLang" style="width:auto">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+          <option value="ko">한국어</option>
+        </select>
+        <button class="btn" onclick="genPDF()" id="btnPDF"></button>
+      </span>
+    </div>
+  </div>
+
+  <footer class="app" id="hFooter"></footer>
+</div>
+
+<!-- PRINT DOCUMENT -->
+<div id="printDoc"></div>
+
+<script>
+/* ============ TRANSLATIONS ============ */
+const T={
+es:{tag:'Cotizador Regulatorio 2026 · USD',client:'1 · Datos del cliente',company:'Empresa / Cliente',companyPh:'Nombre de la empresa',contact:'Contacto',contactPh:'Nombre y correo',quoteNo:'No. de cotización',date:'Fecha',classif:'Clasificación del producto',allClass:'Todas las clasificaciones',skus:'No. de productos (SKUs)',catalog:'2 · Catálogo de servicios',catalogNote:'(precios en USD, sin IVA)',service:'Servicio',fees:'Honorarios Tally',gov:'Derechos (Gob.)',quote:'3 · Cotización',qty:'Cant.',unit:'Precio unit.',feesCol:'Honorarios',empty:'Agrega servicios desde el catálogo.',add:'+ Agregar',monthlyPill:'mensual',govPill:'+ derechos',perMo:'/mes',improve:'✨ Mejorar precio',manual:'Descuento manual:',max:'(máx. 20%)',tc:'TC referencia:',once:'Honorarios Tally — pagos únicos',monthly:'Honorarios Tally — mensualidades',disc:'Descuento',after:'Subtotal con descuento',iva:'IVA 16%',govTot:'Pagos de derechos (Gobierno)*',total:'Total cotización (USD)',mxn:'Equivalente referencia MXN',foot:'* Los pagos de derechos se pagan por separado directamente al Gobierno; se incluyen en la cotización como referencia. El descuento aplica sobre el subtotal de honorarios; el IVA del 16% se calcula sobre el importe ya con descuento.',clear:'Limpiar',pdf:'📄 Generar PDF',pdfLang:'Idioma del PDF:',footer:'Tally Legal · Cotizador interno · Tarifas Regulatorio 2026',discApplied:(p,n)=>`✅ <b>Descuento por volumen aplicado: ${p}%</b> — ${n} productos (10+ → 5% · 15+ → 10% · más de 20 → 20%). Aplica sobre honorarios Tally; los derechos no llevan descuento.`,noDisc:(n)=>`Con <b>${n}</b> producto(s) no aplica descuento por volumen <span class="muted">(10+ → 5% · 15+ → 10% · más de 20 → 20%)</span>.`,manualAuth:(p)=>` <span class="warn">Descuento manual autorizado: ${p}%</span>`,manualOverride:(p)=>`<br>✏️ <span class="warn">Ajuste manual aplicado: ${p}% — sustituye al descuento automático</span> <span class="muted">(útil cuando la cotización se divide y el total real de productos es mayor)</span>`,alertAdd:'Agrega al menos un servicio.',confirmClear:'¿Limpiar la cotización?',pGroup:{P:'Producto',I:'Insumo para la salud'},docTitle:'Cotización de servicios regulatorios',pClient:'Cliente',pContact:'Contacto',pCurrency:'Moneda: USD · IVA desglosado',pNo:'No. de productos',secOnce:'Servicios — pago único',secMonthly:'Servicios — costo mensual',pOnce:'Honorarios — pago único',pMonthly:'Honorarios — mensualidad',pAfter:'Subtotal con descuento',pGov:'Pagos de derechos (Gobierno)*',pTotal:'Total (USD)',pMxn:(tc)=>`Referencia MXN (TC ${tc})`,monthlyCost:'(costo mensual)',fine:(tc)=>`* Los pagos de derechos son cuotas gubernamentales que se pagan por separado directamente a la autoridad; se incluyen en esta cotización únicamente como referencia del costo total del proyecto.<br>Los honorarios de Tally causan IVA del 16%, calculado sobre el subtotal ya con descuento. Los servicios marcados como "costo mensual" se facturan de forma recurrente.<br>Tipo de cambio de referencia: 1 USD = ${tc} MXN. Cotización válida por 30 días naturales a partir de su fecha de emisión.<br>Tally Legal · www.tally.legal`,locale:'es-MX'},
+en:{tag:'Regulatory Quoter 2026 · USD',client:'1 · Client information',company:'Company / Client',companyPh:'Company name',contact:'Contact',contactPh:'Name and email',quoteNo:'Quote No.',date:'Date',classif:'Product classification',allClass:'All classifications',skus:'No. of products (SKUs)',catalog:'2 · Service catalog',catalogNote:'(prices in USD, VAT excluded)',service:'Service',fees:'Tally fees',gov:'Gov. fees',quote:'3 · Quote',qty:'Qty',unit:'Unit price',feesCol:'Fees',empty:'Add services from the catalog.',add:'+ Add',monthlyPill:'monthly',govPill:'+ gov. fees',perMo:'/mo',improve:'✨ Improve price',manual:'Manual discount:',max:'(max. 20%)',tc:'Ref. exchange rate:',once:'Tally fees — one-time',monthly:'Tally fees — monthly',disc:'Discount',after:'Subtotal after discount',iva:'VAT 16%',govTot:'Government fees*',total:'Quote total (USD)',mxn:'MXN reference equivalent',foot:'* Government fees are paid separately, directly to the authority; they are included in this quote for reference. The discount applies to the fee subtotal; 16% VAT is calculated on the discounted amount.',clear:'Clear',pdf:'📄 Generate PDF',pdfLang:'PDF language:',footer:'Tally Legal · Internal quoter · Regulatory rates 2026',discApplied:(p,n)=>`✅ <b>Volume discount applied: ${p}%</b> — ${n} products (10+ → 5% · 15+ → 10% · over 20 → 20%). Applies to Tally fees only; government fees are never discounted.`,noDisc:(n)=>`With <b>${n}</b> product(s), no volume discount applies <span class="muted">(10+ → 5% · 15+ → 10% · over 20 → 20%)</span>.`,manualAuth:(p)=>` <span class="warn">Manual discount authorized: ${p}%</span>`,manualOverride:(p)=>`<br>✏️ <span class="warn">Manual override applied: ${p}% — replaces the automatic discount</span> <span class="muted">(useful when the quote is split and the real product total is higher)</span>`,alertAdd:'Add at least one service.',confirmClear:'Clear the quote?',pGroup:{P:'Product',I:'Healthcare input'},docTitle:'Regulatory Services Quote',pClient:'Client',pContact:'Contact',pCurrency:'Currency: USD · VAT itemized',pNo:'No. of products',secOnce:'Services — one-time payment',secMonthly:'Services — monthly cost',pOnce:'Fees — one-time',pMonthly:'Fees — monthly',pAfter:'Subtotal after discount',pGov:'Government fees*',pTotal:'Total (USD)',pMxn:(tc)=>`MXN reference (rate ${tc})`,monthlyCost:'(monthly cost)',fine:(tc)=>`* Government fees are official charges paid separately, directly to the authority; they are included in this quote only as a reference for the total project cost.<br>Tally fees are subject to 16% VAT, calculated on the discounted subtotal. Services marked as "monthly cost" are billed on a recurring basis.<br>Reference exchange rate: 1 USD = ${tc} MXN. This quote is valid for 30 calendar days from its issue date.<br>Tally Legal · www.tally.legal`,locale:'en-US'},
+zh:{tag:'2026 法规事务报价工具 · 美元',client:'1 · 客户信息',company:'公司 / 客户',companyPh:'公司名称',contact:'联系人',contactPh:'姓名和邮箱',quoteNo:'报价编号',date:'日期',classif:'产品分类',allClass:'全部分类',skus:'产品数量 (SKU)',catalog:'2 · 服务目录',catalogNote:'（价格为美元，不含增值税）',service:'服务项目',fees:'Tally 服务费',gov:'政府规费',quote:'3 · 报价单',qty:'数量',unit:'单价',feesCol:'服务费',empty:'请从目录中添加服务。',add:'+ 添加',monthlyPill:'每月',govPill:'+ 政府规费',perMo:'/月',improve:'✨ 优惠价格',manual:'手动折扣：',max:'（最高 20%）',tc:'参考汇率：',once:'Tally 服务费 — 一次性',monthly:'Tally 服务费 — 每月',disc:'折扣',after:'折后小计',iva:'增值税 16%',govTot:'政府规费*',total:'报价总额（美元）',mxn:'墨西哥比索参考金额',foot:'* 政府规费需另行直接向政府缴纳，在报价单中仅作参考。折扣适用于服务费小计；16% 增值税按折后金额计算。',clear:'清空',pdf:'📄 生成 PDF',pdfLang:'PDF 语言：',footer:'Tally Legal · 内部报价工具 · 2026 法规事务价目表',discApplied:(p,n)=>`✅ <b>已应用批量折扣：${p}%</b> — ${n} 个产品（10+ → 5% · 15+ → 10% · 20个以上 → 20%）。折扣仅适用于 Tally 服务费；政府规费不打折。`,noDisc:(n)=>`当前 <b>${n}</b> 个产品，不适用批量折扣 <span class="muted">（10+ → 5% · 15+ → 10% · 20个以上 → 20%）</span>。`,manualAuth:(p)=>` <span class="warn">已授权手动折扣：${p}%</span>`,manualOverride:(p)=>`<br>✏️ <span class="warn">已应用手动调整：${p}% — 取代自动折扣</span> <span class="muted">（适用于报价单拆分、实际产品总数更多的情况）</span>`,alertAdd:'请至少添加一项服务。',confirmClear:'确定清空报价单吗？',pGroup:{P:'产品',I:'健康用品'},docTitle:'法规事务服务报价单',pClient:'客户',pContact:'联系人',pCurrency:'货币：美元 · 增值税单列',pNo:'产品数量',secOnce:'服务 — 一次性付款',secMonthly:'服务 — 每月费用',pOnce:'服务费 — 一次性',pMonthly:'服务费 — 每月',pAfter:'折后小计',pGov:'政府规费*',pTotal:'总计（美元）',pMxn:(tc)=>`墨西哥比索参考（汇率 ${tc}）`,monthlyCost:'（每月费用）',fine:(tc)=>`* 政府规费为官方费用，需另行直接向主管部门缴纳；在本报价单中仅作为项目总成本的参考。<br>Tally 服务费需加收 16% 增值税，按折后小计计算。标注为"每月费用"的服务按月循环计费。<br>参考汇率：1 美元 = ${tc} 墨西哥比索。本报价单自签发之日起 30 个自然日内有效。<br>Tally Legal · www.tally.legal`,locale:'zh-CN'},
+ko:{tag:'2026 규제 업무 견적 도구 · USD',client:'1 · 고객 정보',company:'회사 / 고객',companyPh:'회사명',contact:'담당자',contactPh:'이름 및 이메일',quoteNo:'견적 번호',date:'날짜',classif:'제품 분류',allClass:'전체 분류',skus:'제품 수 (SKU)',catalog:'2 · 서비스 목록',catalogNote:'(가격은 USD, 부가세 별도)',service:'서비스',fees:'Tally 수수료',gov:'정부 수수료',quote:'3 · 견적서',qty:'수량',unit:'단가',feesCol:'수수료',empty:'목록에서 서비스를 추가하세요.',add:'+ 추가',monthlyPill:'월별',govPill:'+ 정부 수수료',perMo:'/월',improve:'✨ 가격 개선',manual:'수동 할인:',max:'(최대 20%)',tc:'참고 환율:',once:'Tally 수수료 — 일회성',monthly:'Tally 수수료 — 월별',disc:'할인',after:'할인 적용 후 소계',iva:'부가세 16%',govTot:'정부 수수료*',total:'견적 총액 (USD)',mxn:'멕시코 페소 참고 금액',foot:'* 정부 수수료는 정부에 별도로 직접 납부하며, 견적서에는 참고용으로 포함됩니다. 할인은 수수료 소계에 적용되며, 부가세 16%는 할인 적용 후 금액에 대해 계산됩니다.',clear:'초기화',pdf:'📄 PDF 생성',pdfLang:'PDF 언어:',footer:'Tally Legal · 내부 견적 도구 · 2026 규제 업무 요율표',discApplied:(p,n)=>`✅ <b>수량 할인 적용: ${p}%</b> — 제품 ${n}개 (10개 이상 → 5% · 15개 이상 → 10% · 20개 초과 → 20%). Tally 수수료에만 적용되며, 정부 수수료는 할인되지 않습니다.`,noDisc:(n)=>`제품 <b>${n}</b>개는 수량 할인 대상이 아닙니다 <span class="muted">(10개 이상 → 5% · 15개 이상 → 10% · 20개 초과 → 20%)</span>.`,manualAuth:(p)=>` <span class="warn">수동 할인 승인됨: ${p}%</span>`,manualOverride:(p)=>`<br>✏️ <span class="warn">수동 조정 적용: ${p}% — 자동 할인을 대체합니다</span> <span class="muted">(견적서가 분할되어 실제 제품 총수가 더 많은 경우에 유용)</span>`,alertAdd:'서비스를 하나 이상 추가하세요.',confirmClear:'견적서를 초기화할까요?',pGroup:{P:'제품',I:'보건용품'},docTitle:'규제 업무 서비스 견적서',pClient:'고객',pContact:'담당자',pCurrency:'통화: USD · 부가세 별도 표기',pNo:'제품 수',secOnce:'서비스 — 일회성 결제',secMonthly:'서비스 — 월별 비용',pOnce:'수수료 — 일회성',pMonthly:'수수료 — 월별',pAfter:'할인 적용 후 소계',pGov:'정부 수수료*',pTotal:'총액 (USD)',pMxn:(tc)=>`멕시코 페소 참고 (환율 ${tc})`,monthlyCost:'(월별 비용)',fine:(tc)=>`* 정부 수수료는 관계 당국에 별도로 직접 납부하는 공식 비용이며, 본 견적서에는 프로젝트 총비용 참고용으로만 포함됩니다.<br>Tally 수수료에는 부가세 16%가 별도로 부과되며, 할인 적용 후 소계에 대해 계산됩니다. "월별 비용"으로 표시된 서비스는 매월 반복 청구됩니다.<br>참고 환율: 1 USD = ${tc} MXN. 본 견적서는 발행일로부터 30일간 유효합니다.<br>Tally Legal · www.tally.legal`,locale:'ko-KR'}
+};
+
+/* Classifications: key → {group P/I, names per lang} */
+const CLASSES=[
+ {k:'L',g:'P',es:'Producto de limpieza',en:'Cleaning product',zh:'清洁用品',ko:'세정제품'},
+ {k:'C',g:'P',es:'Cosmético',en:'Cosmetic',zh:'化妆品',ko:'화장품'},
+ {k:'A',g:'P',es:'Alimento',en:'Food',zh:'食品',ko:'식품'},
+ {k:'S',g:'P',es:'Suplemento alimenticio',en:'Dietary supplement',zh:'膳食补充剂',ko:'건강기능식품'},
+ {k:'D',g:'I',es:'Dispositivo médico',en:'Medical device',zh:'医疗器械',ko:'의료기기'},
+ {k:'M',g:'I',es:'Medicamento',en:'Drug / Medicine',zh:'药品',ko:'의약품'},
+ {k:'R',g:'I',es:'Remedio herbolario',en:'Herbal remedy',zh:'草药制剂',ko:'약초 제제'},
+];
+const ALL='LCASDMR';
+/* Catalog: fee = Tally fee USD VAT included · gov = government fees (paid separately) */
+const CATALOG=[
+ {id:'rep',fee:60.00,gov:0,monthly:true,ap:ALL,
+  name:{es:'Representante legal ante COFEPRIS',en:'Legal representative before COFEPRIS',zh:'COFEPRIS 法定代理人',ko:'COFEPRIS 법정 대리인'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'avf',fee:500.00,gov:0,monthly:false,ap:ALL,
+  name:{es:'Aviso de funcionamiento',en:'Notice of Operation (Aviso de Funcionamiento)',zh:'营业备案 (Aviso de Funcionamiento)',ko:'영업 신고 (Aviso de Funcionamiento)'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'rsan',fee:500.00,gov:0,monthly:true,ap:'DMR',
+  name:{es:'Responsable sanitario',en:'Sanitary Responsible (Responsable Sanitario)',zh:'卫生负责人 (Responsable Sanitario)',ko:'위생 책임자 (Responsable Sanitario)'},
+  note:{es:'Insumos para la salud',en:'Healthcare inputs',zh:'健康用品类',ko:'보건용품'}},
+ {id:'avp',fee:500.00,gov:0,monthly:false,ap:'LCDMR',
+  name:{es:'Aviso de publicidad',en:'Advertising Notice (Aviso de Publicidad)',zh:'广告备案 (Aviso de Publicidad)',ko:'광고 신고 (Aviso de Publicidad)'},
+  note:{es:'No aplica para alimentos y suplementos. Depende del público objetivo.',en:'Not applicable to food and supplements. Depends on the target audience.',zh:'不适用于食品和膳食补充剂。取决于广告受众。',ko:'식품 및 건강기능식품에는 적용되지 않습니다. 광고 대상에 따라 다릅니다.'}},
+ {id:'ccl',fee:747.00,gov:0,monthly:false,ap:'LCAS',
+  name:{es:'Consulta de clasificación',en:'Product Classification Consultation',zh:'产品分类咨询',ko:'제품 분류 자문'},
+  note:{es:'Cosméticos, limpieza, alimentos y bebidas no alcohólicas, suplementos.',en:'Cosmetics, cleaning products, food and non-alcoholic beverages, supplements.',zh:'适用于化妆品、清洁用品、食品和非酒精饮料、膳食补充剂。',ko:'화장품, 세정제품, 식품·무알코올 음료, 건강기능식품에 적용됩니다.'}},
+ {id:'ring',fee:70.00,gov:0,monthly:false,ap:ALL,
+  name:{es:'Revisión de ingredientes y listings de SKUs',en:'Ingredient review and SKU listings',zh:'成分审核及 SKU 清单',ko:'성분 검토 및 SKU 리스팅'},
+  note:{es:'Por SKU',en:'Per SKU',zh:'按 SKU 计费',ko:'SKU당'}},
+ {id:'reti',fee:230.00,gov:0,monthly:false,ap:'LCAS',
+  name:{es:'Revisión de etiquetado',en:'Labeling review',zh:'标签审核',ko:'라벨링 검토'},
+  note:{es:'Por producto',en:'Per product',zh:'按产品计费',ko:'제품당'}},
+ {id:'ppub',fee:3220.00,gov:5075.96,monthly:false,ap:'ASDMR',
+  name:{es:'Permiso de publicidad',en:'Advertising Permit',zh:'广告许可',ko:'광고 허가'},
+  note:{es:'No aplica cosméticos ni limpieza. El costo depende del medio publicitario.',en:'Not applicable to cosmetics or cleaning products. Cost depends on the advertising medium.',zh:'不适用于化妆品和清洁用品。费用取决于广告媒介。',ko:'화장품·세정제품에는 적용되지 않습니다. 비용은 광고 매체에 따라 다릅니다.'}},
+ {id:'pspm',fee:850.00,gov:558.24,monthly:false,ap:'M',
+  name:{es:'Permiso sanitario previo a la importación — Medicamentos',en:'Prior Import Sanitary Permit — Drugs',zh:'进口前卫生许可 — 药品',ko:'수입 사전 위생 허가 — 의약품'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'pspd',fee:644.00,gov:238.36,monthly:false,ap:'D',
+  name:{es:'Permiso sanitario previo a la importación — Dispositivos médicos',en:'Prior Import Sanitary Permit — Medical devices',zh:'进口前卫生许可 — 医疗器械',ko:'수입 사전 위생 허가 — 의료기기'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'pspp',fee:644.00,gov:538.43,monthly:false,ap:'AS',
+  name:{es:'Permiso sanitario previo a la importación — Productos',en:'Prior Import Sanitary Permit — Products',zh:'进口前卫生许可 — 产品',ko:'수입 사전 위생 허가 — 제품'},
+  note:{es:'No aplica cosméticos ni limpieza.',en:'Not applicable to cosmetics or cleaning products.',zh:'不适用于化妆品和清洁用品。',ko:'화장품·세정제품에는 적용되지 않습니다.'}},
+ {id:'rnm',fee:7800.00,gov:15179.11,monthly:false,ap:'M',
+  name:{es:'Registro sanitario de medicamentos — Nueva molécula',en:'Drug Marketing Authorization — New molecule',zh:'药品注册 — 新分子',ko:'의약품 등록 — 신물질'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'rgen',fee:5600.00,gov:8489.15,monthly:false,ap:'M',
+  name:{es:'Registro sanitario de medicamentos — Genérico (OTC)',en:'Drug Marketing Authorization — Generic (OTC)',zh:'药品注册 — 仿制药 (OTC)',ko:'의약품 등록 — 제네릭 (OTC)'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'rher',fee:4600.00,gov:2018.67,monthly:false,ap:'MR',
+  name:{es:'Registro sanitario — Homeopático / herbolario / vitamínico',en:'Marketing Authorization — Homeopathic / herbal / vitamin',zh:'注册 — 顺势疗法 / 草药 / 维生素类',ko:'등록 — 동종요법 / 약초 / 비타민'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'farm',fee:1000.00,gov:0,monthly:true,ap:'M',
+  name:{es:'Alta de unidad de farmacovigilancia y mantenimiento de SGC',en:'Pharmacovigilance Unit registration and QMS maintenance',zh:'药物警戒部门注册及质量体系维护',ko:'약물감시 부서 등록 및 QMS 유지'},
+  note:{es:'Requisito para registro sanitario de medicamentos.',en:'Required for drug marketing authorization in Mexico.',zh:'墨西哥药品注册的必要条件。',ko:'멕시코 의약품 등록의 필수 요건입니다.'}},
+ {id:'dm1',fee:2836.00,gov:1261.69,monthly:false,ap:'D',
+  name:{es:'Registro sanitario — Dispositivos médicos Clase I',en:'Medical Device Registration — Class I',zh:'医疗器械注册 — I 类',ko:'의료기기 등록 — 1등급'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'dm2',fee:3300.00,gov:1850.44,monthly:false,ap:'D',
+  name:{es:'Registro sanitario — Dispositivos médicos Clase II',en:'Medical Device Registration — Class II',zh:'医疗器械注册 — II 类',ko:'의료기기 등록 — 2등급'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'dm3',fee:3800.00,gov:2355.14,monthly:false,ap:'D',
+  name:{es:'Registro sanitario — Dispositivos médicos Clase III',en:'Medical Device Registration — Class III',zh:'医疗器械注册 — III 类',ko:'의료기기 등록 — 3등급'},
+  note:{es:'',en:'',zh:'',ko:''}},
+ {id:'tecn',fee:1000.00,gov:0,monthly:true,ap:'D',
+  name:{es:'Alta de unidad de tecnovigilancia y mantenimiento de SGC',en:'Technovigilance Unit registration and QMS maintenance',zh:'器械警戒部门注册及质量体系维护',ko:'기술감시 부서 등록 및 QMS 유지'},
+  note:{es:'Requisito para registro sanitario de dispositivos médicos.',en:'Required for medical device registration in Mexico.',zh:'墨西哥医疗器械注册的必要条件。',ko:'멕시코 의료기기 등록의 필수 요건입니다.'}},
+];
+
+/* ============ STATE & HELPERS ============ */
+let LANG='es';
+let items=[]; // {id, qty, price}
+const usd=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(v);
+const mxn=v=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(v)+' MXN';
+const $=id=>document.getElementById(id);
+const t=()=>T[LANG];
+
+function tierDiscount(n){ if(n>20) return .20; if(n>=15) return .10; if(n>=10) return .05; return 0; }
+
+function setLang(l){
+  LANG=l;
+  const x=t();
+  document.documentElement.lang=l;
+  $('hTag').textContent=x.tag;
+  $('hClient').textContent=x.client;
+  $('lCompany').textContent=x.company; $('cliente').placeholder=x.companyPh;
+  $('lContact').textContent=x.contact; $('contacto').placeholder=x.contactPh;
+  $('lQuoteNo').textContent=x.quoteNo; $('lDate').textContent=x.date;
+  $('lClass').textContent=x.classif; $('lSkus').textContent=x.skus;
+  // classification select (keep selection)
+  const cur=$('clasif').value;
+  $('clasif').innerHTML=`<option value="">${x.allClass}</option>`+CLASSES.map(c=>`<option value="${c.k}">${c[l]} (${x.pGroup[c.g]})</option>`).join('');
+  $('clasif').value=cur;
+  $('hCatalog').textContent=x.catalog; $('hCatalogNote').textContent=x.catalogNote;
+  $('thService').textContent=x.service; $('thFees').textContent=x.fees; $('thGov').textContent=x.gov;
+  $('hQuote').textContent=x.quote;
+  $('thService2').textContent=x.service; $('thQty').textContent=x.qty; $('thUnit').textContent=x.unit;
+  $('thFees2').textContent=x.feesCol; $('thGov2').textContent=x.gov;
+  $('emptyMsg').textContent=x.empty;
+  $('improveBtn').textContent=x.improve;
+  $('lManual').textContent=x.manual; $('lMax').textContent=x.max; $('lTc').textContent=x.tc;
+  $('lOnce').textContent=x.once; $('lMonthly').textContent=x.monthly; $('lDisc').textContent=x.disc;
+  $('lAfter').textContent=x.after; $('lIva').textContent=x.iva; $('lGov').textContent=x.govTot; $('lTotal').textContent=x.total; $('lMxn').textContent=x.mxn;
+  $('footNote').textContent=x.foot;
+  $('btnClear').textContent=x.clear; $('btnPDF').textContent=x.pdf; $('lPdfLang').textContent=x.pdfLang;
+  $('hFooter').textContent=x.footer;
+  $('pdfLang').value=l;
+  render();
+}
+
+function renderCatalog(){
+  const cls=$('clasif').value, x=t();
+  const tb=document.querySelector('#catalog tbody'); tb.innerHTML='';
+  CATALOG.filter(p=>!cls||p.ap.includes(cls)).forEach(p=>{
+    const tr=document.createElement('tr'); tr.className='catalog-row';
+    tr.innerHTML=`<td><span class="name">${p.name[LANG]}</span>${p.monthly?`<span class="pill mes">${x.monthlyPill}</span>`:''}${p.gov?`<span class="pill gov">${x.govPill}</span>`:''}${p.note[LANG]?`<div class="desc">${p.note[LANG]}</div>`:''}</td>
+      <td class="num">${usd(p.fee)}${p.monthly?`<span class="muted">${x.perMo}</span>`:''}</td>
+      <td class="num">${p.gov?usd(p.gov):'—'}</td>
+      <td class="num"><button class="btn small" onclick="addItem('${p.id}')">${x.add}</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function addItem(id){
+  const ex=items.find(i=>i.id===id);
+  if(ex){ex.qty++;} else {const p=CATALOG.find(c=>c.id===id); items.push({id,qty:1,price:p.fee});}
+  render();
+}
+function delItem(idx){ items.splice(idx,1); render(); }
+function setQty(idx,v){ items[idx].qty=Math.max(1,parseInt(v)||1); render(); }
+function setPrice(idx,v){ items[idx].price=Math.max(0,parseFloat(v)||0); render(); }
+function toggleManual(){ const b=$('manualDiscBox'); b.style.display=b.style.display==='inline'?'none':'inline'; if(b.style.display==='none'){$('manualDisc').value=0;} render(); }
+
+function compute(){
+  const skus=parseInt($('skus').value)||1;
+  let once=0, monthly=0, gov=0;
+  items.forEach(it=>{
+    const p=CATALOG.find(c=>c.id===it.id);
+    const line=it.price*it.qty;
+    if(p.monthly) monthly+=line; else once+=line;
+    gov+=p.gov*it.qty;
+  });
+  const tier=tierDiscount(skus);
+  let manual=0;
+  const manualActive=$('manualDiscBox').style.display==='inline';
+  if(manualActive){
+    manual=Math.min(20,Math.max(0,parseFloat($('manualDisc').value)||0))/100;
+  }
+  const rate=(manualActive&&manual>0)?manual:tier; // el ajuste manual sustituye al automático
+  const fees=once+monthly;      // subtotal de honorarios (sin IVA)
+  const disc=fees*rate;         // descuento sobre el subtotal
+  const after=fees-disc;        // subtotal con descuento
+  const iva=after*0.16;         // IVA 16% calculado después del descuento
+  return {skus,once,monthly,gov,rate,tier,disc,after,iva,total:after+iva+gov};
+}
+
+function render(){
+  renderCatalog();
+  const x=t();
+  const tb=document.querySelector('#quote tbody'); tb.innerHTML='';
+  items.forEach((it,idx)=>{
+    const p=CATALOG.find(c=>c.id===it.id);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="name">${p.name[LANG]}</span>${p.monthly?`<span class="pill mes">${x.monthlyPill}</span>`:''}</td>
+      <td><input class="qty" type="number" min="1" value="${it.qty}" onchange="setQty(${idx},this.value)"></td>
+      <td class="num"><input class="qty" style="width:100px !important;text-align:right" type="number" step="0.01" value="${it.price.toFixed(2)}" onchange="setPrice(${idx},this.value)"></td>
+      <td class="num">${usd(it.price*it.qty)}${p.monthly?`<span class="muted">${x.perMo}</span>`:''}</td>
+      <td class="num">${p.gov?usd(p.gov*it.qty):'—'}</td>
+      <td><button class="del" onclick="delItem(${idx})">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  $('emptyMsg').style.display=items.length?'none':'block';
+
+  const c=compute();
+  const info=$('discountInfo');
+  const manualActive=$('manualDiscBox').style.display==='inline';
+  if(c.tier>0){
+    info.innerHTML=x.discApplied((c.tier*100).toFixed(0),c.skus)+((manualActive&&c.rate!==c.tier)?x.manualOverride((c.rate*100).toFixed(1)):'');
+  }else{
+    info.innerHTML=x.noDisc(c.skus)+(c.rate>0?x.manualAuth((c.rate*100).toFixed(1)):'');
+  }
+  $('improveBtn').style.display=items.length?'inline-block':'none';
+  $('tOnce').textContent=usd(c.once);
+  $('tMonthly').textContent=c.monthly?usd(c.monthly)+' '+x.perMo:usd(0);
+  $('discLine').style.display=c.rate>0?'flex':'none';
+  $('discPct').textContent=(c.rate*100).toFixed(0)+'%';
+  $('tDisc').textContent='− '+usd(c.disc);
+  $('tAfter').textContent=usd(c.after);
+  $('tIva').textContent=usd(c.iva);
+  $('tGov').textContent=usd(c.gov);
+  $('tTotal').textContent=usd(c.total);
+  const tc=parseFloat($('tc').value)||18;
+  $('tMXN').textContent=mxn(c.total*tc);
+}
+
+function genPDF(){
+  const x=t();
+  if(!items.length){alert(x.alertAdd);return;}
+  const pl=$('pdfLang').value;           // PDF language (can differ from UI)
+  const px=T[pl];
+  const c=compute();
+  const tc=parseFloat($('tc').value)||18;
+  const logo=document.querySelector('header.app img').src;
+  const fecha=($('fecha').value?new Date($('fecha').value+'T12:00:00'):new Date()).toLocaleDateString(px.locale,{day:'numeric',month:'long',year:'numeric'});
+  const rows=(list)=>list.map(it=>{
+    const p=CATALOG.find(y=>y.id===it.id);
+    return `<tr><td>${p.name[pl]}${p.monthly?` <i>${px.monthlyCost}</i>`:''}</td><td class="num">${it.qty}</td><td class="num">${usd(it.price)}</td><td class="num">${usd(it.price*it.qty)}${p.monthly?px.perMo:''}</td><td class="num">${p.gov?usd(p.gov*it.qty):'—'}</td></tr>`;
+  }).join('');
+  const head=`<tr><th>${px.service}</th><th class="num">${px.qty}</th><th class="num">${px.unit}</th><th class="num">${px.feesCol}</th><th class="num">${px.gov}</th></tr>`;
+  const onceItems=items.filter(i=>!CATALOG.find(cc=>cc.id===i.id).monthly);
+  const mesItems=items.filter(i=>CATALOG.find(cc=>cc.id===i.id).monthly);
+  $('printDoc').innerHTML=`
+    <header>
+      <div><img src="${logo}" alt="Tally"><h1 style="margin-top:10px">${px.docTitle}</h1>
+      <div style="font-size:12px;color:#555">${$('cliente').value?`<b>${px.pClient}:</b> `+$('cliente').value:''} ${$('contacto').value?` · <b>${px.pContact}:</b> `+$('contacto').value:''}</div></div>
+      <div class="meta"><b>${$('folio').value}</b><br>${fecha}<br>${px.pCurrency}<br>${px.pNo}: ${c.skus}</div>
+    </header>
+    ${onceItems.length?`<div class="sec">${px.secOnce}</div>
+    <table><thead>${head}</thead><tbody>${rows(onceItems)}</tbody></table>`:''}
+    ${mesItems.length?`<div class="sec">${px.secMonthly}</div>
+    <table><thead>${head}</thead><tbody>${rows(mesItems)}</tbody></table>`:''}
+    <div class="totbox">
+      <div class="totline"><span class="lbl">${px.pOnce}</span><span class="num">${usd(c.once)}</span></div>
+      ${c.monthly?`<div class="totline"><span class="lbl">${px.pMonthly}</span><span class="num">${usd(c.monthly)} ${px.perMo}</span></div>`:''}
+      ${c.rate>0?`<div class="totline" style="color:#1e9c4d"><span class="lbl">${px.disc} ${(c.rate*100).toFixed(0)}%</span><span class="num">− ${usd(c.disc)}</span></div>`:''}
+      <div class="totline"><span class="lbl">${px.pAfter}</span><span class="num">${usd(c.after)}</span></div>
+      <div class="totline"><span class="lbl">${px.iva}</span><span class="num">${usd(c.iva)}</span></div>
+      <div class="totline"><span class="lbl">${px.pGov}</span><span class="num">${usd(c.gov)}</span></div>
+      <div class="totline big"><span>${px.pTotal}</span><span class="num">${usd(c.total)}</span></div>
+      <div class="totline"><span class="lbl">${px.pMxn(tc)}</span><span class="num">${mxn(c.total*tc)}</span></div>
+    </div>
+    <div class="fine">${px.fine(tc)}</div>`;
+  window.print();
+}
+
+function resetAll(){
+  if(items.length&&!confirm(t().confirmClear))return;
+  items=[]; $('manualDisc').value=0; $('manualDiscBox').style.display='none'; render();
+}
+
+/* init */
+(function(){
+  const d=new Date();
+  $('fecha').value=d.toISOString().slice(0,10);
+  $('folio').value='TLY-'+d.toISOString().slice(0,10).replace(/-/g,'')+'-01';
+  $('clasif').addEventListener('change',render);
+  $('skus').addEventListener('input',render);
+  setLang('es');
+})();
+</script>
+</body>
+</html>
